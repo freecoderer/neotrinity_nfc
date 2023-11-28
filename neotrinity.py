@@ -28,165 +28,9 @@ else:
 nonce = web3.eth.get_transaction_count(caller)
 
 # 스마트 컨트랙트 ABI 및 주소 설정
-contract_abi = '''[
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "_code",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "reserver",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "time",
-          "type": "uint256"
-        }
-      ],
-      "name": "roomOpened",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "reserver",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "time",
-          "type": "uint256"
-        }
-      ],
-      "name": "roomReserved",
-      "type": "event"
-    },
-    {
-      "inputs": [],
-      "name": "code",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        }
-      ],
-      "name": "minutesAndSeconds",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "truncatedTimestamp",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "pure",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "reserverID",
-          "type": "address"
-        }
-      ],
-      "name": "openRoom",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint8",
-          "name": "year",
-          "type": "uint8"
-        },
-        {
-          "internalType": "uint8",
-          "name": "month",
-          "type": "uint8"
-        },
-        {
-          "internalType": "uint8",
-          "name": "day",
-          "type": "uint8"
-        },
-        {
-          "internalType": "uint8",
-          "name": "hour",
-          "type": "uint8"
-        },
-        {
-          "internalType": "uint8",
-          "name": "period",
-          "type": "uint8"
-        },
-        {
-          "internalType": "address",
-          "name": "reserver",
-          "type": "address"
-        }
-      ],
-      "name": "reserveRoom",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  ]'''
+contract_abi = '''
+[{"inputs":[{"internalType":"string","name":"_code","type":"string"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"reserver","type":"address"},{"indexed":true,"internalType":"uint256","name":"time","type":"uint256"}],"name":"roomOpened","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"reserver","type":"address"},{"indexed":true,"internalType":"uint256","name":"time","type":"uint256"}],"name":"roomReserved","type":"event"},{"inputs":[],"name":"code","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"minutesAndSeconds","outputs":[{"internalType":"uint256","name":"truncatedTimestamp","type":"uint256"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"address","name":"reserverID","type":"address"}],"name":"openRoom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint16","name":"year","type":"uint16"},{"internalType":"uint8","name":"month","type":"uint8"},{"internalType":"uint8","name":"day","type":"uint8"},{"internalType":"uint8","name":"hour","type":"uint8"},{"internalType":"uint8","name":"period","type":"uint8"},{"internalType":"address","name":"reserver","type":"address"}],"name":"reserveRoom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]
+'''
 
 contract_address = os.environ.get('myaddress')
 
@@ -208,3 +52,12 @@ send_tx = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
 # Wait for transaction receipt
 tx_receipt = web3.eth.wait_for_transaction_receipt(send_tx)
+
+print(tx_receipt['status'])
+# Check transaction status
+
+
+if tx_receipt['status']:
+    print("Transaction successful.")
+else:
+    print("Transaction failed.")
