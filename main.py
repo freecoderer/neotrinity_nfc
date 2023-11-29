@@ -5,10 +5,35 @@ from eth_account import Account
 from dotenv import load_dotenv
 import os
 import RPi.GPIO as GPIO
+import board
+import busio
+import os
+import sys 
+import time
+import logging
+import spidev as SPI
+sys.path.append("..")
+from lib import LCD_2inch
+from PIL import Image,ImageDraw,ImageFont
+import RPi.GPIO as GPIO
 
+
+# Raspberry Pi pin information
+RST = 27
+DC = 25
+BL = 18
+bus = 0 
+device = 0 
+logging.basicConfig(level=logging.DEBUG)
+directory = os.getcwd()
+
+doInterrupt =0
+showOn = 0
+data = ''
 
 def execute_ethereum_transaction():
     load_dotenv()
+    global doInterrupt
 
     # Ethereum 노드의 RPC 엔드포인트 입력
     web3 = Web3(Web3.HTTPProvider(os.environ.get('myendpoint')))
@@ -22,6 +47,18 @@ def execute_ethereum_transaction():
         print("-" * 50)
         print("Connection Successful")
         print("-" * 50)
+
+        disp = LCD_2inch.LCD_2inch(spi=SPI.SpiDev(bus, device),spi_freq=90000000,rst=RST,dc=DC,bl=BL)
+        disp.Init() # Initialize library.
+        disp.clear() # Clear display.
+        bg = Image.new("RGB", (disp.width, disp.height), "BLACK")
+        draw = ImageDraw.Draw(bg)
+        # display with hardware SPI:
+        data='consucc'
+        image = Image.open(directory+'/status/'+data+'/frame'+'.png')
+        disp.ShowImage(image)
+        showOn = 0
+        logging.info("quit:")
     else:
         print("Connection Failed")
         return
@@ -50,19 +87,54 @@ def execute_ethereum_transaction():
 
     # Sign transaction
     signed_tx = web3.eth.account.sign_transaction(call_function, private_key=private_key)
+    # GPIO 핀 번호 설정
+    SERVO_PIN = 17
 
+    # GPIO 모드 설정
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(SERVO_PIN, GPIO.OUT)
+
+    # 50Hz PWM 시작
+    pwm = GPIO.PWM(SERVO_PIN, 50)
+    pwm.start(0)
+    try:
     # Send transaction
-    send_tx = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        send_tx = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
     # Wait for transaction receipt
-    tx_receipt = web3.eth.wait_for_transaction_receipt(send_tx)
+        tx_receipt = web3.eth.wait_for_transaction_receipt(send_tx)
 
-    print(tx_receipt['status'])
+        print(tx_receipt['status'])
     # Check transaction status
-    if tx_receipt['status']:
-        print("Transaction successful.")
-    else:
-        print("Transaction failed.")
+        if tx_receipt['status']:
+            print("Transaction successful.")
+            data='transucc'  # 성공 이미지 이름으로 변경
+            image = Image.open(directory+'/status/'+data+'/frame'+'.png')
+            disp.ShowImage(image)
+            time.sleep(5)
+            # 서보 모터 제어
+            pwm.ChangeDutyCycle(7.5)  # 90도 회전
+            time.sleep(1)  # 1초 대기
+            pwm.ChangeDutyCycle(2.5)  # 0도로 회전
+            time.sleep(1)  # 1초 대기
+            pwm.ChangeDutyCycle(12.5)  # 180도로 회전
+            time.sleep(1)  # 1초 대기
+
+        else:
+            print("Transaction failed.")
+            raise Exception("Transaction failed") 
+    except Exception as e:
+        print(f"Error executing transaction: {e}")
+        data='error'  # 에러 이미지 이름으로 변경
+        image = Image.open(directory+'/status/'+data+'/frame'+'.png')
+        disp.ShowImage(image)
+        time.sleep(5)
+
+    # PWM 종료
+    pwm.stop()
+
+    # GPIO 설정 초기화
+    GPIO.cleanup()
 
 
 if __name__ == '__main__':
