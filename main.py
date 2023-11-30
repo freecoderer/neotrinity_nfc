@@ -31,6 +31,12 @@ doInterrupt =0
 showOn = 0
 data = ''
 
+disp = LCD_2inch.LCD_2inch(spi=SPI.SpiDev(bus, device),spi_freq=90000000,rst=RST,dc=DC,bl=BL)
+disp.Init() # Initialize library.
+disp.clear() # Clear display.
+bg = Image.new("RGB", (disp.width, disp.height), "BLACK")
+draw = ImageDraw.Draw(bg)
+
 def execute_ethereum_transaction():
     load_dotenv()
     global doInterrupt
@@ -48,19 +54,17 @@ def execute_ethereum_transaction():
         print("Connection Successful")
         print("-" * 50)
 
-        disp = LCD_2inch.LCD_2inch(spi=SPI.SpiDev(bus, device),spi_freq=90000000,rst=RST,dc=DC,bl=BL)
-        disp.Init() # Initialize library.
-        disp.clear() # Clear display.
-        bg = Image.new("RGB", (disp.width, disp.height), "BLACK")
-        draw = ImageDraw.Draw(bg)
         # display with hardware SPI:
         data='consucc'
         image = Image.open(directory+'/status/'+data+'/frame'+'.png')
         disp.ShowImage(image)
-        showOn = 0
         logging.info("quit:")
     else:
         print("Connection Failed")
+        data='wait'  # 에러 이미지 이름으로 변경
+        image = Image.open(directory+'/status/'+data+'/frame'+'.png')
+        disp.ShowImage(image)
+        time.sleep(5)  # 에러 화면을 5초 동안 표시합니다
         return
 
     # Initialize address nonce
@@ -126,9 +130,13 @@ def execute_ethereum_transaction():
     except Exception as e:
         print(f"Error executing transaction: {e}")
         data='error'  # 에러 이미지 이름으로 변경
-        image = Image.open(directory+'/status/'+data+'/frame'+'.png')
-        disp.ShowImage(image)
-        time.sleep(5)
+        try:
+            image = Image.open(directory+'/status/'+data+'/frame'+'.png')
+            image = image.rotate(180)
+            disp.ShowImage(image)
+            time.sleep(5)  # 에러 화면을 5초 동안 표시합니다
+        except Exception as ex:
+            print(f"Error displaying the error: {ex}")
 
     # PWM 종료
     pwm.stop()
@@ -162,6 +170,9 @@ if __name__ == '__main__':
                 execute_ethereum_transaction()
 
     except Exception as e:
-        print(e)
+        data='error'
+        image = Image.open(directory+'/status/'+data+'/frame'+'.png')
+        disp.ShowImage(image)
+        time.sleep(5)  # 에러 화면을 5초 동안 표시합니다
     finally:
         GPIO.cleanup()
