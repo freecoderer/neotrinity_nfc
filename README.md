@@ -1,6 +1,6 @@
 # NeoTrinity NFC
 
-![header](https://capsule-render.vercel.app/api?type=waving&color=7F7FD5&text=NeoTrinity%20NFC&height=100&fontSize=40&fontColor=ffffff)
+![header](https://capsule-render.vercel.app/api?type=waving&color=45ADA8&text=NeoTrinity%20NFC&height=100&fontSize=40&fontColor=ffffff)
 
 ## Overview
 NeoTrinity NFC is a project designed to implement NFC (Near Field Communication) technology for neotrinity project (A project which is for managning university's facility with blockchain). This repository contains code and resources to interact with NFC hardware and manage NFC data efficiently. The project leverages modern Python libraries to facilitate communication between NFC devices and the system.
@@ -34,4 +34,4 @@ Feel free to reach out for any queries or collaboration opportunities:
 - **GitHub**: [freecoderer](https://github.com/freecoderer)
 - **LinkedIn**: [Donghyun Kim](https://www.linkedin.com/in/kdh1999dev)
 
-![footer](https://capsule-render.vercel.app/api?section=footer&type=waving&color=7F7FD5)
+![footer](https://capsule-render.vercel.app/api?section=footer&type=waving&color=45ADA8)
